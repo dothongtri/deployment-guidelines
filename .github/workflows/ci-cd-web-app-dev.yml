@@ -1,0 +1,115 @@
+name: CI/CD - Web app (dev)
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - "web-app/**"
+      - "deployment/services/docker-compose.yml"
+      - ".github/workflows/ci-cd-web-app-dev.yml"
+
+  push:
+    branches: [dev]
+    paths:
+      - "web-app/**"
+      - "deployment/services/docker-compose.yml"
+      - ".github/workflows/ci-cd-web-app-dev.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/b1807679/web-app
+
+jobs:
+  test:
+    name: Lint and build Next.js app
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: web-app
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: web-app/pnpm-lock.yaml
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run lint
+        run: pnpm lint
+
+      - name: Build Next.js application
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL_DEV }}
+        run: pnpm build
+
+  build_and_push:
+    name: Build and publish Docker image
+    needs: test
+    runs-on: ubuntu-latest
+
+    # PR chỉ lint/build. Push vào dev mới publish và deploy.
+    if: github.ref == 'refs/heads/dev' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./web-app
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL_DEV }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:dev
+
+  deploy_local:
+    name: Deploy to local Docker machine
+    needs: build_and_push
+    runs-on: [self-hosted, Windows, X64]
+    environment: dev
+
+    steps:
+      - name: Checkout deployment configuration
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull and restart web app
+        shell: pwsh
+        env:
+          WEB_APP_IMAGE: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+        run: |
+          docker compose -f deployment/services/docker-compose.yml pull web-app
+          docker compose -f deployment/services/docker-compose.yml up -d --no-deps web-app
+          docker compose -f deployment/services/docker-compose.yml ps web-app
