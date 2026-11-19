@@ -111,6 +111,8 @@ jobs:
         shell: powershell
         env:
           WEB_APP_IMAGE: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          # .env bị gitignore nên runner không có; truyền thẳng để compose nội suy.
+          NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL_DEV }}
         run: |
           docker compose -f deployment/services/docker-compose.yml pull web-app
           docker compose -f deployment/services/docker-compose.yml up -d --no-deps web-app

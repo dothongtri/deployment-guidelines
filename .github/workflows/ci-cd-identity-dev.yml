@@ -102,6 +102,10 @@ jobs:
         shell: powershell
         env:
           IDENTITY_IMAGE: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          # .env bị gitignore nên runner không có; truyền thẳng để compose nội suy.
+          DBMS_CONNECTION: ${{ secrets.DBMS_CONNECTION }}
+          DBMS_USERNAME: ${{ secrets.DBMS_USERNAME }}
+          DBMS_PASSWORD: ${{ secrets.DBMS_PASSWORD }}
         run: |
           docker compose -f deployment/services/docker-compose.yml pull identity-service
           docker compose -f deployment/services/docker-compose.yml up -d --no-deps identity-service
