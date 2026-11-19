@@ -1,7 +1,7 @@
 services:
 
   web-app:
-    image: ${WEB_APP_IMAGE:-ghcr.io/b1807679/web-app:0.9.1}
+    image: ${WEB_APP_IMAGE:-ghcr.io/dothongtri/web-app:0.9.1}
     container_name: web-app
     restart: always
     ports:
@@ -12,7 +12,7 @@ services:
       - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 
   identity-service:
-    image: ${IDENTITY_IMAGE:-ghcr.io/b1807679/identity-service:0.9.1}
+    image: ${IDENTITY_IMAGE:-ghcr.io/dothongtri/identity-service:0.9.1}
     container_name: identity-service
     restart: always
     environment:

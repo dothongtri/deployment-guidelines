@@ -22,7 +22,9 @@ permissions:
   packages: write
 
 env:
-  IMAGE_NAME: ghcr.io/b1807679/web-app
+  # GHCR chỉ cho phép GITHUB_TOKEN push vào namespace của chủ sở hữu repo.
+  # Dùng github.repository_owner để image luôn khớp tài khoản/tổ chức thực tế.
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/web-app
 
 jobs:
   test:
