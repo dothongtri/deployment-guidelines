@@ -108,7 +108,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull and restart web app
-        shell: pwsh
+        shell: powershell
         env:
           WEB_APP_IMAGE: ${{ env.IMAGE_NAME }}:${{ github.sha }}
         run: |

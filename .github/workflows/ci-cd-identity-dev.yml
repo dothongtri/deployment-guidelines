@@ -99,7 +99,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull and restart identity service
-        shell: pwsh
+        shell: powershell
         env:
           IDENTITY_IMAGE: ${{ env.IMAGE_NAME }}:${{ github.sha }}
         run: |
