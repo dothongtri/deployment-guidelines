@@ -9,7 +9,9 @@ services:
     networks:
       - app-network
     environment:
-      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+      # Đọc lúc runtime bởi Next.js server (src/app/api/[...path]/route.ts).
+      # Dùng tên service nội bộ của Docker network, KHÔNG lộ ra trình duyệt.
+      - API_INTERNAL_URL=${API_INTERNAL_URL:-http://identity-service:8080}
 
   identity-service:
     image: ${IDENTITY_IMAGE:-ghcr.io/dothongtri/identity-service:0.9.1}

@@ -56,8 +56,6 @@ jobs:
         run: pnpm lint
 
       - name: Build Next.js application
-        env:
-          NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL_DEV }}
         run: pnpm build
 
   build_and_push:
@@ -84,8 +82,6 @@ jobs:
         with:
           context: ./web-app
           push: true
-          build-args: |
-            NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL_DEV }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ env.IMAGE_NAME }}:dev
@@ -111,8 +107,8 @@ jobs:
         shell: powershell
         env:
           WEB_APP_IMAGE: ${{ env.IMAGE_NAME }}:${{ github.sha }}
-          # .env bị gitignore nên runner không có; truyền thẳng để compose nội suy.
-          NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL_DEV }}
+          # URL backend nội bộ (identity-service) được khai báo thẳng trong
+          # deployment/services/docker-compose.yml nên không cần truyền ở đây.
         run: |
           docker compose -f deployment/services/docker-compose.yml pull web-app
           docker compose -f deployment/services/docker-compose.yml up -d --no-deps web-app

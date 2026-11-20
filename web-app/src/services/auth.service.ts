@@ -1,11 +1,9 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-if (!BASE_URL) {
-  throw new Error(
-    "Missing environment variable: NEXT_PUBLIC_API_BASE_URL\n" +
-      "Add it to .env.local (see .env.example for reference).",
-  );
-}
+// Trình duyệt luôn gọi same-origin "/api". Next.js server sẽ proxy tiếp sang
+// identity-service qua API_INTERNAL_URL (xem src/app/api/[...path]/route.ts).
+//
+// Không dùng NEXT_PUBLIC_API_BASE_URL nữa: biến NEXT_PUBLIC_* bị nhúng cứng vào
+// bundle lúc build, nên đổi trong docker-compose lúc runtime không có tác dụng.
+const API_PREFIX = "/api";
 
 // ─── API envelope ─────────────────────────────────────────────────────────────
 
@@ -83,7 +81,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 export async function login(
   credentials: LoginCredentials,
 ): Promise<LoginResult> {
-  const res = await fetch(`${BASE_URL}/identity/auth/token`, {
+  const res = await fetch(`${API_PREFIX}/identity/auth/token`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),
@@ -97,7 +95,7 @@ export async function login(
  * Returns the currently authenticated user's profile.
  */
 export async function getMyInfo(token: string): Promise<UserInfo> {
-  const res = await fetch(`${BASE_URL}/identity/users/my-info`, {
+  const res = await fetch(`${API_PREFIX}/identity/users/my-info`, {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
   });

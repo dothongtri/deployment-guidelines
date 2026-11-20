@@ -123,11 +123,18 @@ docker network create devteria-network
 
 2. Configure environment variables in `.env`:
    ```env
-   NEXT_PUBLIC_API_BASE_URL=http://<YOUR_SERVER_IP_OR_DOMAIN>:8080
+   API_INTERNAL_URL=http://identity-service:8080
    DBMS_CONNECTION=jdbc:mysql://mysql:3306/identity_service
    DBMS_USERNAME=devteria
    DBMS_PASSWORD=your_secure_password
    ```
+
+   > **Vì sao không dùng `NEXT_PUBLIC_API_BASE_URL`?**
+   > Trình duyệt không resolve được tên `identity-service` (chỉ tồn tại trong
+   > `devteria-network`), còn biến `NEXT_PUBLIC_*` bị nhúng cứng vào bundle lúc
+   > `next build` nên đổi lúc runtime không có tác dụng. Vì vậy web-app gọi
+   > same-origin `/api/*`, và Next.js server proxy sang `API_INTERNAL_URL`
+   > (biến runtime, chỉ phía server).
 
 3. Launch application services:
    ```bash

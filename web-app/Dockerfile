@@ -20,10 +20,8 @@ RUN \
 FROM base AS builder
 WORKDIR /app
 
-# Public Next.js variables are evaluated while creating the production bundle.
-ARG NEXT_PUBLIC_API_BASE_URL
-ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
-
+# Không bake URL backend vào bundle nữa: browser gọi same-origin /api và
+# Next.js server proxy sang identity-service bằng API_INTERNAL_URL (runtime).
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
