@@ -1,0 +1,21 @@
+# Dependencies / build output — được cài & build lại bên trong image
+node_modules
+.next
+out
+
+# Môi trường & file local không được đưa vào image
+.env*.local
+.env
+.git
+.gitignore
+
+# Rác của JS tooling
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+coverage
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
